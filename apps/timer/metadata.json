@@ -1,0 +1,14 @@
+{ "id": "timer",
+  "name": "My Timer App",
+  "shortName":"My Timer",
+  "version":"0.01",
+  "description": "This is a description of my awesome timer app",
+  "icon": "app.png",
+  "tags": "",
+  "supports" : ["BANGLEJS2"],  
+  "readme": "README.md",
+  "storage": [
+    {"name":"timer.app.js","url":"app.js"},
+    {"name":"timer.png","url":"app-icon.js","evaluate":true}
+  ]
+}

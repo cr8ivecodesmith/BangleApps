@@ -1,6 +1,7 @@
 (function (back) {
   var settings = Object.assign({
     hrm: 0,
+    hrmMinConfidence: 80,
     stepGoal: 10000
   }, require("Storage").readJSON("health.json", true) || {});
 
@@ -21,6 +22,17 @@
       ][v],
       onchange: v => {
         settings.hrm = v;
+        setSettings(settings);
+      }
+    },
+
+    /*LANG*/"HRM Min Confidence": {
+      value: settings.hrmMinConfidence,
+      min: 0,
+      max: 100,
+      step: 1,
+      onchange: v => {
+        settings.hrmMinConfidence = v;
         setSettings(settings);
       }
     },

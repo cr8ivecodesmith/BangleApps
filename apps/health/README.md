@@ -20,12 +20,25 @@ Stores:
 
 ## Settings
 
+* **Daily Step Goal** - Default 10000, daily step goal for pedometer apps to use
+* **Daily Move Goal** - Default 30, daily active movement goal in minutes
+* **Daily Stand Goal** - Default 6, daily standing hours goal
+
+**Heart rate**
+
 * **Heart Rt** - Whether to monitor heart rate or not
   * **Off** - Don't turn HRM on, but record heart rate if the HRM was turned on by another app/widget
-  * **10 Min** - Turn HRM on every 10 minutes (for each heath entry) and turn it off after 2 minutes, or when a good reading is found
+  * **10 Min** - Turn HRM on every 10 minutes (for each health entry) and turn it off after 2 minutes, or when a good reading is found
   * **Always** - Keep HRM on all the time (more accurate recording, but reduces battery life to ~36 hours)
-* **Daily Step Goal** - Default 10000, daily step goal for pedometer apps to use
+* **Heart Rt Min Confidence** - Default 80, use HRM reading with at least this amount of confidence
 
+**Idle alert**
+
+* **Enable** - Whether to alert idleness or not
+
+**Sleep monitor**
+
+* **Enable** - Whether to monitor sleep or not
 
 ## Technical Info
 

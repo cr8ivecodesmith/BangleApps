@@ -5,10 +5,10 @@
     standGoal: 6,
     hrm: 0,
     hrmMinConfidence: 80,
-    idleMon: 0,
+    idleMon: false,
     idleStartHour: 9,
     idleEndHour: 17,
-    sleepMon: 0
+    sleepMon: false
   }, require("Storage").readJSON("health.json", true) || {});
 
   function menuMain() {
@@ -33,7 +33,7 @@
         min: 0,
         max: 480,
         step: 10,
-        format: v => (v > 1) ? v + "mins" : v,
+        format: v => (v > 1) ? v + " mins" : v,
         onchange: v => {
           settings.moveGoal = v;
           setSettings(settings);
@@ -45,7 +45,7 @@
         min: 0,
         max: 24,
         step: 1,
-        format: v => (v > 1) ? v + "hrs" : (v > 0) ? v + "hr" : v,
+        format: v => (v > 1) ? v + " hrs" : (v > 0) ? v + " hr" : v,
         onchange: v => {
           settings.moveGoal = v;
           setSettings(settings);
@@ -53,8 +53,8 @@
       },
 
       /*LANG*/"Heart rate": () => menuHeartMonitor(),
-      /*LANG*/"Idle": () => menuStandMonitor(),
-      /*LANG*/"Sleep": () => menuSleepMonitor()
+      /*LANG*/"Idle alert": () => menuIdleMonitor(),
+      /*LANG*/"Sleep monitor": () => menuSleepMonitor()
     });
   }
 
@@ -70,8 +70,8 @@
         max: 3,
         format: v => [
           /*LANG*/"Off",
-          /*LANG*/"3 min",
-          /*LANG*/"10 min",
+          /*LANG*/"3 mins",
+          /*LANG*/"10 mins",
           /*LANG*/"Always"
         ][v],
         onchange: v => {
@@ -85,6 +85,7 @@
         min: 0,
         max: 100,
         step: 5,
+        format: v => v + "%"
         onchange: v => {
           settings.hrmMinConfidence = v;
           setSettings(settings);
@@ -95,18 +96,12 @@
 
   function menuIdleMonitor() {
     E.showMenu({
-      "": { title: /*LANG*/"Idle" },
+      "": { title: /*LANG*/"Idle alert" },
 
       /*LANG*/"< Back": () => menuMain(),
 
-      /*LANG*/"Idleness alert": {
+      /*LANG*/"Enable": {
         value: settings.idleMon,
-        min: 0,
-        max: 1,
-        format: v => [
-          /*LANG*/"Off",
-          /*LANG*/"On"
-        ][v],
         onchange: v => {
           settings.idleMon = v;
           setSettings(settings);
@@ -139,18 +134,12 @@
 
   function menuSleepMonitor() {
     E.showMenu({
-      "": { title: /*LANG*/"Sleep" },
+      "": { title: /*LANG*/"Sleep monitor" },
 
       /*LANG*/"< Back": () => menuMain(),
 
-      /*LANG*/"Monitor sleep": {
+      /*LANG*/"Enable": {
         value: settings.sleepMon,
-        min: 0,
-        max: 1,
-        format: v => [
-          /*LANG*/"Off",
-          /*LANG*/"On"
-        ][v],
         onchange: v => {
           settings.sleepMon = v;
           setSettings(settings);

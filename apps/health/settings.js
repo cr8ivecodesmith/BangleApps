@@ -85,7 +85,7 @@
         min: 0,
         max: 100,
         step: 5,
-        format: v => v + "%"
+        format: v => v + "%",
         onchange: v => {
           settings.hrmMinConfidence = v;
           setSettings(settings);
@@ -153,4 +153,4 @@
   }
 
   menuMain();
-})
+});

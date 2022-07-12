@@ -3,12 +3,19 @@
     stepGoal: 10000,
     moveGoal: 30,
     standGoal: 6,
+
     hrm: 0,
     hrmMinConfidence: 80,
-    idleMon: false,
+
+    idleEnabled: false,
     idleStartHour: 9,
     idleEndHour: 17,
-    sleepMon: false
+    idleDND: false,
+    idleDNDStartHour: 0,
+    idleDNDEndHour: 8,
+    idleNoMoveThresh: 100,
+
+    sleepEnabled: false
   }, require("Storage").readJSON("health.json", true) || {});
 
   function menuMain() {
@@ -53,8 +60,8 @@
       },
 
       /*LANG*/"Heart rate": () => menuHeartMonitor(),
-      /*LANG*/"Idle alert": () => menuIdleMonitor(),
-      /*LANG*/"Sleep monitor": () => menuSleepMonitor()
+      /*LANG*/"Idle alert": () => menuIdleMon(),
+      /*LANG*/"Sleep monitor": () => menuSleepMon()
     });
   }
 
@@ -94,16 +101,16 @@
     });
   }
 
-  function menuIdleMonitor() {
+  function menuIdleMon() {
     E.showMenu({
       "": { title: /*LANG*/"Idle alert" },
 
       /*LANG*/"< Back": () => menuMain(),
 
       /*LANG*/"Enable": {
-        value: settings.idleMon,
+        value: settings.idleEnabled,
         onchange: v => {
-          settings.idleMon = v;
+          settings.idleEnabled = v;
           setSettings(settings);
         }
       },
@@ -120,7 +127,7 @@
       },
 
       /*LANG*/"End hour": {
-        value: settings.idleStartHour,
+        value: settings.idleEndHour,
         min: 0,
         max: 24,
         step: 1,
@@ -128,23 +135,83 @@
           settings.idleEndHour = v;
           setSettings(settings);
         }
+      },
+      /*LANG*/"Advanced": () => menuIdleMonAdv()
+    });
+  }
+
+  function menuIdleMonAdv() {
+    E.showMenu({
+      "": { title: /*LANG*/"Idle alert Advanced" },
+
+      /*LANG*/"< Back": () => menuIdleMon(),
+
+      /*LANG*/"Enable DND": {
+        value: settings.idleDND,
+        onchange: v => {
+          settings.idleDND = v;
+          setSettings(settings);
+        }
+      },
+
+      /*LANG*/"DND Start hour": {
+        value: settings.idleDNDStartHour,
+        min: 0,
+        max: 24,
+        step: 1,
+        onchange: v => {
+          settings.idleDNDStartHour = v;
+          setSettings(settings);
+        }
+      },
+
+      /*LANG*/"DND End hour": {
+        value: settings.idleDNDEndHour,
+        min: 0,
+        max: 24,
+        step: 1,
+        onchange: v => {
+          settings.idleEndHour = v;
+          setSettings(settings);
+        }
+      },
+
+      /*LANG*/"No Movement Threshold": {
+        value: settings.idleNoMoveThresh,
+        min: 0,
+        max: 500,
+        step: 10,
+        onchange: v => {
+          settings.idleNoMoveThresh = v;
+          setSettings(settings);
+        }
       }
     });
   }
 
-  function menuSleepMonitor() {
+  function menuSleepMon() {
     E.showMenu({
       "": { title: /*LANG*/"Sleep monitor" },
 
       /*LANG*/"< Back": () => menuMain(),
 
       /*LANG*/"Enable": {
-        value: settings.sleepMon,
+        value: settings.sleepEnabled,
         onchange: v => {
-          settings.sleepMon = v;
+          settings.sleepEnabled = v;
           setSettings(settings);
         }
-      }
+      },
+      /*LANG*/"Advanced": () => menuSleepMonAdv()
+    });
+  }
+
+  function menuSleepMonAdv() {
+    E.showMenu({
+      "": { title: /*LANG*/"Sleep monitor Advanced" },
+
+      /*LANG*/"< Back": () => menuSleepMon()
+
     });
   }
 

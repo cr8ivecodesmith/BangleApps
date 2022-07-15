@@ -37,7 +37,7 @@ exports.readAllRecords = function(d, cb) {
     }
     idx += DB_RECORD_LEN; // +1 because we have an extra record with totals for the end of the day
   }
-}
+};
 
 // Read daily summaries from the given month
 exports.readDailySummaries = function(d, cb) {
@@ -58,7 +58,7 @@ exports.readDailySummaries = function(d, cb) {
     }
     idx += DB_RECORDS_PER_DAY*DB_RECORD_LEN;
   }
-}
+};
 
 // Read all records from the given month
 exports.readDay = function(d, cb) {
@@ -81,4 +81,61 @@ exports.readDay = function(d, cb) {
       idx += DB_RECORD_LEN;
     }
   }
-}
+};
+
+
+/**
+ * Utils
+ *
+ */
+exports.vibrate = function() {
+  Bangle.buzz(80).then(()=>{setTimeout(()=>{
+    Bangle.buzz(100).then(()=>{setTimeout(()=>{
+      Bangle.buzz(80);
+      }, 400);});
+    }, 200);
+  });
+};
+
+
+/**
+ * Idle alert monitoring
+ *
+ */
+exports.idlSaveData = function (data) {
+  require("Storage").writeJSON("health.idle.data.json", data);
+};
+
+exports.idlLoadData = function () {
+  let health = Bangle.getHealthStatus("day");
+  let data = Object.assign({
+    firstLoad: true,
+    stepsDate: new Date(),
+    stepsOnDate: health.steps,
+    okDate: new Date(1970),
+    dismissDate: new Date(1970),
+    pauseDate: new Date(1970),
+  },
+  require("Storage").readJSON("health.idle.data.json") || {});
+
+  if(typeof(data.stepsDate) == "string")
+    data.stepsDate = new Date(data.stepsDate);
+  if(typeof(data.okDate) == "string")
+    data.okDate = new Date(data.okDate);
+  if(typeof(data.dismissDate) == "string")
+    data.dismissDate = new Date(data.dismissDate);
+  if(typeof(data.pauseDate) == "string")
+    data.pauseDate = new Date(data.pauseDate);
+
+  return data;
+};
+
+exports.idlMustAlert = function(idle_data, idle_settings) {
+  // We'll alert if there has been no activity within the hour.
+  let now = new Date();
+  let maxInactiveMins = idle_settings.maxInactiveMins || 60;
+  if ((now - idle_data.stepsDate) / 60000 > maxInactiveMins) { // inactivity detected
+    return true;
+  }
+  return false;
+};

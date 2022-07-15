@@ -14,6 +14,10 @@
     idleDNDStartHour: 0,
     idleDNDEndHour: 8,
     idleNoMoveThresh: 100,
+    idlePollInterval: 5,
+    idleMinActiveMins: 1,
+    idleMinSteps: 50,
+    idleMaxInactiveMins: 60,
 
     sleepEnabled: false
   }, require("Storage").readJSON("health.json", true) || {});
@@ -59,13 +63,13 @@
         }
       },
 
-      /*LANG*/"Heart rate": () => menuHeartMonitor(),
+      /*LANG*/"Heart rate": () => menuHeartMon(),
       /*LANG*/"Idle alert": () => menuIdleMon(),
       /*LANG*/"Sleep monitor": () => menuSleepMon()
     });
   }
 
-  function menuHeartMonitor() {
+  function menuHeartMon() {
     E.showMenu({
       "": { title: /*LANG*/"Heart rate" },
 
@@ -86,6 +90,16 @@
           setSettings(settings);
         }
       },
+
+      /*LANG*/"Advanced": () => menuHeartMonAdv()
+    });
+  }
+
+  function menuHeartMonAdv() {
+    E.showMenu({
+      "": { title: /*LANG*/"Heart rate Adv" },
+
+      /*LANG*/"< Back": () => menuHeartMon(),
 
       /*LANG*/"HRM Min Confidence": {
         value: settings.hrmMinConfidence,
@@ -142,7 +156,7 @@
 
   function menuIdleMonAdv() {
     E.showMenu({
-      "": { title: /*LANG*/"Idle alert Advanced" },
+      "": { title: /*LANG*/"Idle alert Adv" },
 
       /*LANG*/"< Back": () => menuIdleMon(),
 
@@ -176,6 +190,41 @@
         }
       },
 
+      /*LANG*/"Min active minutes": {
+        value: settings.idleMinActiveMins,
+        min: 1,
+        max: 10,
+        step: 1,
+        format: v => (v > 1) ? v + " mins" : (v > 0) ? v + " min" : v,
+        onchange: v => {
+          settings.idleMinActiveMins = v;
+          setSettings(settings);
+        }
+      },
+
+      /*LANG*/"Min steps": {
+        value: settings.idleMinSteps,
+        min: 10,
+        max: 100,
+        step: 10,
+        onchange: v => {
+          settings.idleMinSteps = v;
+          setSettings(settings);
+        }
+      },
+
+      /*LANG*/"Max inactive minutes": {
+        value: settings.idleMaxInactiveMins,
+        min: 10,
+        max: 120,
+        step: 10,
+        format: v => (v > 1) ? v + " mins" : (v > 0) ? v + " min" : v,
+        onchange: v => {
+          settings.idleMaxInactiveMins = v;
+          setSettings(settings);
+        }
+      },
+
       /*LANG*/"No Movement Threshold": {
         value: settings.idleNoMoveThresh,
         min: 0,
@@ -183,6 +232,18 @@
         step: 10,
         onchange: v => {
           settings.idleNoMoveThresh = v;
+          setSettings(settings);
+        }
+      },
+
+      /*LANG*/"Idle poll interval": {
+        value: settings.idlePollInterval,
+        min: 1,
+        max: 10,
+        step: 1,
+        format: v => (v > 1) ? v + " mins" : (v > 0) ? v + " min" : v,
+        onchange: v => {
+          settings.idlePollInterval = v;
           setSettings(settings);
         }
       }
@@ -208,7 +269,7 @@
 
   function menuSleepMonAdv() {
     E.showMenu({
-      "": { title: /*LANG*/"Sleep monitor Advanced" },
+      "": { title: /*LANG*/"Sleep monitor Adv" },
 
       /*LANG*/"< Back": () => menuSleepMon()
 

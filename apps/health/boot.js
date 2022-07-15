@@ -1,3 +1,7 @@
+/**
+ * Heart rate monitoring
+ *
+ */
 (function(){
   var settings = require("Storage").readJSON("health.json",1)||{};
   var hrm = 0|settings.hrm;
@@ -18,14 +22,118 @@
      }
    }
    Bangle.on("health", onHealth);
-   Bangle.on('HRM', h => {
+   Bangle.on("HRM", h => {
      if (h.confidence>=hrmMinConfidence) Bangle.setHRMPower(0, "health");
    });
-   if (Bangle.getHealthStatus().bpmConfidence) return;
+   if (Bangle.getHealthStatus().bpmConfidence >= hrmMinConfidence) return;
    onHealth();
   } else Bangle.setHRMPower(hrm!=0, "health");
 })();
 
+
+/**
+ * Idle alert monitoring
+ *
+ */
+(function () {
+  const settings = require("Storage").readJSON("health.json",1)||{};
+
+  let enabled = settings.idleEnabled;
+  let startHour = settings.idleStartHour;
+  let endHour = settings.idleEndHour;
+
+  let dndEnabled = settings.idleDND;
+  let dndStartHour = settings.idleDNDStartHour;
+  let dndEndHour = settings.idleDNDEndHour;
+
+  let pollInterval = settings.idlePollInterval;
+  let noMoveThresh = settings.idleNoMoveThresh;
+  let minActiveMins = settings.idleMinActiveMins;
+  let minSteps = settings.idleMinSteps;
+
+  // load variable before defining functions cause it can trigger a ReferenceError
+  const lib = require("health");
+  let idle_data = lib.idlLoadData();
+
+  if (idle_data.firstLoad) {
+      idle_data.firstLoad = false;
+      lib.idlSaveData(idle_data);
+  }
+
+  function run() {
+    if (isNotWorn()) return;
+    let now = new Date();
+    let h = now.getHours();
+
+    if (isDuringAlertHours(h)) {
+      let health = Bangle.getHealthStatus("day");
+      // TODO: Include minActiveMins as well
+      if (health.steps - idle_data.stepsOnDate >= minSteps // more steps made than needed
+          || health.steps < idle_data.stepsOnDate) { // new day or reboot of the watch
+        idle_data.stepsOnDate = health.steps;
+        idle_data.stepsDate = now;
+        lib.idlSaveData(idle_data);
+      }
+
+      if (lib.idlMustAlert(idle_data, settings)) {
+        g.clear();
+        lib.vibrate();
+        E.showMessage("Time to move a little!", {
+            title: "Idle alert!"
+        });
+        setTimeout(load, 5000);
+      }
+    }
+  }
+
+  function isNotWorn() {
+    let h = Bangle.getHealthStatus();
+    return Bangle.isCharging() || h.movement <= noMoveThresh;
+  }
+
+  function isDuringAlertHours(h) {
+    let isDND = false;
+
+    if (dndEnabled) {
+      if (dndStartHour < dndEndHour) { // not passing through midnight
+        isDND = (h >= dndStartHour && h < dndEndHour);
+      } else { // passing through midnight
+        isDND = (h >= dndStartHour || h < dndEndHour);
+      }
+    }
+
+    if (!isDND) {
+      if (startHour < endHour) { // not passing through midnight
+        return (h >= startHour && h < endHour);
+      } else { // passing through midnight
+        return (h >= startHour || h < endHour);
+      }
+    }
+  }
+
+  Bangle.on('midnight', function () {
+    /*
+    Usefull trick to have the app working smothly for people using it at night 
+    */
+    let now = new Date();
+    let h = now.getHours();
+    if (enabled && isDuringAlertHours(h)) {
+      // updating only the steps and keeping the original stepsDate on purpose 
+      idle_data.stepsOnDate = 0;
+      lib.idlSaveData(idle_data);
+    }
+  });
+
+  if (enabled) {
+    setInterval(run, pollInterval * 60000);
+  }
+})();
+
+
+/**
+ * Health data recording
+ *
+ */
 Bangle.on("health", health => {
   // ensure we write health info for *last* block
   var d = new Date(Date.now() - 590000);
